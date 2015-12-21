@@ -1,9 +1,9 @@
 /*
  * 	main.c
  *	HTTP 1.0 Server
- *	Epoll/No Blocking
+ *	Epoll/NonBlocking
  *  Created on: Nov 22, 2015
- *      Author: mint
+ *      Author: j
  */
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -14,9 +14,11 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
-#include "rio.h"
 
-#define MAXEVENTS 1000
+#include "rio.h"
+#include "cfg.h"
+
+#define strhash(s) (*(s))
 
 enum METHOD
 {
@@ -34,6 +36,18 @@ void get_filetype(char *filename, char *filetype);
 
 int handle_request(int fd);
 
+void SigHandle(int sig){
+    switch(sig){
+        case SIGPIPE:
+            fprintf(stderr, "\nBroken Pipe\n");
+            break;
+        case SIGCHLD:
+            /* wait for all child processes */
+            while(waitpid(-1, 0, WNOHANG) > 0) ;
+            break;
+    }
+}
+
 int main(int argc, char *args[])
 {
 	struct sockaddr_in clientaddr;
@@ -43,14 +57,13 @@ int main(int argc, char *args[])
 
 	//enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getListenfd(&port);
-	;
+    printf("Listen to port: %d\n", port);
 
 	// set listen socket nonblocking
 	int flags = fcntl(listenfd, F_GETFD);
 	flags |= O_NONBLOCK;
 	fcntl(listenfd, F_SETFD, flags);
 
-	//
 	struct epoll_event ev, events[MAXEVENTS];
 	int epollfd, nfds;
 	epollfd = epoll_create1(0);
@@ -61,7 +74,7 @@ int main(int argc, char *args[])
 
 	for(;;)
 	{
-		// argumet -1 indicated the timeout is no sure -- we will change it depends on requirement
+		// argumet -1 indicated the timeout is no sure (blocking) -- we will change it depends on requirement
 		nfds = epoll_wait(epollfd, events, MAXEVENTS, -1);
 		for(int i = 0; i < nfds; i++)
 		{
@@ -123,7 +136,6 @@ int handle_request(int fd)
 
 	read_requesthdrs(&rio, cgiargs);
 
-	//todo strhas not completed
 	switch(strhash(method)){
 	case GET:
 		is_static = parse_uri(uri, filename, cgiargs);
@@ -183,7 +195,7 @@ void display_error(int fd, const char *cause, const char *errnum,
     strcat(body, "<body bgcolor='#ffffff'>\r\n");
     sprintf(body, "%s<h1>%s: %s</h1>\r\n", body, errnum, shortmsg);
     sprintf(body, "%s<p>%s: %s</p>\r\n", body, longmsg, cause);
-    strcat(body, "<hr/>Powered by <em>Zerver/1.0.0</em></body></html>\r\n");
+    strcat(body, "<hr/>Powered by <em>Aowu/1.0.0</em></body></html>\r\n");
 
     sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
     rio_writen(fd, buf, strlen(buf));
