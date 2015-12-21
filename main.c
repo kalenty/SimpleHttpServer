@@ -23,7 +23,7 @@
 
 #include "rio.h"
 #include "cfg.h"
-
+#include "sockfd.h"
 #define strhash(s) (*(s))
 
 int parse_uri(char *uri, char *filename, char *cgiargs);
@@ -151,7 +151,7 @@ int handle_request(int fd)
 
 	switch(strhash(method)){
 	case GET:
-		is_static = parse_uri(uri, filename, cgiargs);
+	    is_static = parse_uri(uri, filename, cgiargs);
 	    if(stat(filename, &sbuf) < 0)
 	    {
 	    	display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -175,8 +175,8 @@ int handle_request(int fd)
 	        serve_dynamic(fd, filename, cgiargs);
 	     }
 	     break;
-	case POST:
-		sprintf(filename, "%s", uri);
+	case POST: 
+	     	sprintf(filename, "./%s", uri);
 		if(stat(filename, &sbuf) < 0)
 		{
 			display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -228,12 +228,12 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            sprintf(cgiargs, "%s", ptr+1);
+            sprintf(cgiargs, "./%s", ptr+1);
             *ptr = 0;
         }
         else *cgiargs = 0;
 
-        sprintf(filename, "%s", uri);
+        sprintf(filename, "./%s", uri);
         return 0;
     }
     else
