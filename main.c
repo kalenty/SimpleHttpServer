@@ -54,6 +54,9 @@ int main(int argc, char *args[])
 	socklen_t addrlen = sizeof(clientaddr);
 	int listenfd, connfd;
 	uint16_t port = 54523;
+    
+    signal(SIGPIPE, SigHandle);
+    signal(SIGCHLD, SigHandle);
 
 	//enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getListenfd(&port);
