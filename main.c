@@ -7,8 +7,14 @@
  */
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <sys/types.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <arpa/inet.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
@@ -20,21 +26,28 @@
 
 #define strhash(s) (*(s))
 
-enum METHOD
-{
-	GET, POST, HEAD
-};
-
 int parse_uri(char *uri, char *filename, char *cgiargs);
+
+void read_requesthdrs(rio_t *rp, char *cgiargs);
+
+void serve_dynamic(int fd, char *filename, char *cgiargs);
 
 void serve_static(int fd, char *filename, long size);
 
-void display_error(int fd, const char *cause, const char *errnum,
-                const char *shortmsg, const char *longmsg);
+void display_error(int fd, const char *cause, const char *errnum, const char *shortmsg, const char *longmsg);
 
 void get_filetype(char *filename, char *filetype);
 
 int handle_request(int fd);
+
+int setnonblocking(int sockfd)
+{
+    if (fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) == -1)
+    {
+	return -1;
+    }
+    return 0;
+}
 
 void SigHandle(int sig){
     switch(sig){
@@ -59,14 +72,11 @@ int main(int argc, char *args[])
     signal(SIGCHLD, SigHandle);
 
 	//enscapulation of bind() and listen() -- sockfd.h/c
-	listenfd = getListenfd(&port);
+	listenfd = getlistenfd(&port);
     printf("Listen to port: %d\n", port);
 
 	// set listen socket nonblocking
-	int flags = fcntl(listenfd, F_GETFD);
-	flags |= O_NONBLOCK;
-	fcntl(listenfd, F_SETFD, flags);
-
+	setnonblocking(listenfd);
 	struct epoll_event ev, events[MAXEVENTS];
 	int epollfd, nfds;
 	epollfd = epoll_create1(0);
@@ -144,13 +154,13 @@ int handle_request(int fd)
 		is_static = parse_uri(uri, filename, cgiargs);
 	    if(stat(filename, &sbuf) < 0)
 	    {
-	    	disperror(fd, filename, "404", "Not found", "Can not find this file");
+	    	display_error(fd, filename, "404", "Not found", "Can not find this file");
 	        return 1;
 	    }
 	    if(is_static){
 			if(!(S_IRUSR & sbuf.st_mode) || !(S_ISREG(sbuf.st_mode)))
 			{
-				disperror(fd, filename, "403", "Forbidden", "Can not read this file");
+				display_error(fd, filename, "403", "Forbidden", "Can not read this file");
 				return 1;
 			}
 			serve_static(fd, filename, sbuf.st_size);
@@ -159,7 +169,7 @@ int handle_request(int fd)
 	    {
 	    	if(!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode))
 	    	{
-	    		disperror(fd, filename, "403", "Forbidden", "Can not read this file");
+	    		display_error(fd, filename, "403", "Forbidden", "Can not read this file");
 	    		return 1;
 	        }
 	        serve_dynamic(fd, filename, cgiargs);
@@ -169,36 +179,35 @@ int handle_request(int fd)
 		sprintf(filename, "%s", uri);
 		if(stat(filename, &sbuf) < 0)
 		{
-			disperror(fd, filename, "404", "Not found", "Can not find this file");
+			display_error(fd, filename, "404", "Not found", "Can not find this file");
 			return 1;
 		}
 		if(!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode))
 		{
-			disperror(fd, filename, "403", "Forbidden", "Can not read this file");
+			display_error(fd, filename, "403", "Forbidden", "Can not read this file");
 			return 1;
 		}
 		serve_dynamic(fd, filename, cgiargs);
-	break;
+		break;
 	case HEAD:
-		disperror(fd, "HEAD request", "200", "OK", "Succeed");
+		display_error(fd, "HEAD request", "200", "OK", "Succeed");
 		break;
 	default:
-		disperror(fd, "", "501", "Method Not Implemented", "");
+		display_error(fd, "", "501", "Method Not Implemented", "");
 	   	return -1;
 	}
 
 	return 0;
 }
 
-void display_error(int fd, const char *cause, const char *errnum,
-                const char *shortmsg, const char *longmsg)
+void display_error(int fd, const char *cause, const char *errnum, const char *shortmsg, const char *longmsg)
 {
     char buf[BUFSIZ], body[BUFSIZ];
     sprintf(body, "<html><title>%s %s</title>", errnum, shortmsg);
     strcat(body, "<body bgcolor='#ffffff'>\r\n");
     sprintf(body, "%s<h1>%s: %s</h1>\r\n", body, errnum, shortmsg);
     sprintf(body, "%s<p>%s: %s</p>\r\n", body, longmsg, cause);
-    strcat(body, "<hr/>Powered by <em>Aowu/1.0.0</em></body></html>\r\n");
+    strcat(body, "<hr/>Powered by <em>SimpleHttpServer/1.0.0</em></body></html>\r\n");
 
     sprintf(buf, "HTTP/1.0 %s %s\r\n", errnum, shortmsg);
     rio_writen(fd, buf, strlen(buf));
@@ -212,7 +221,7 @@ void display_error(int fd, const char *cause, const char *errnum,
 int parse_uri(char *uri, char *filename, char *cgiargs)
 {
     // 1 -- static
-	// 0 -- dynamic
+    // 0 -- dynamic
     char *ptr;
 
     if(strncmp(uri, "/cgi-bin", strlen("/cgi-bin")) == 0)
