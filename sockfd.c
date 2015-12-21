@@ -1,6 +1,6 @@
 #include "sockfd.h"
 
-int open_listenfd(uint16_t *port)
+int getlistenfd(uint16_t *port)
 {
     int serv_sockfd ,optval=1;
     struct sockaddr_in serv_addr;
@@ -38,7 +38,7 @@ int open_listenfd(uint16_t *port)
     return serv_sockfd;
 }
 
-int open_clientfd(const char *hostorip, uint16_t port)
+int getclientfd(const char *hostorip, uint16_t port)
 {
     int clifd;
     struct hostent *hp;
