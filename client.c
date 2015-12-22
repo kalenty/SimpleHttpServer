@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include "sockfd.h"
 
-int setnonblocking(int fd)
+int setnonblock(int fd)
 {
 	int flags;
 	flags = fcntl(fd, F_GETFL);
@@ -21,17 +21,16 @@ int setnonblocking(int fd)
 	fcntl(fd, F_SETFL, flags);
 }
 
-struct epoll_event events[1024];
+struct epoll_event ev, events[1024];
 int epollfd, nfds;
 
 void new_connet()
 {
-    	int sockfd;
-    	sockfd = getclientfd("127.0.0.1", (uint16_t) 54523);
-    	setnonblocking(sockfd);
+    int sockfd;
+    sockfd = open_clientfd("127.0.0.1", (uint16_t) 54523);
+    setnonblocking(sockfd);
     
-    	struct epoll_event ev;
-    	ev.data.fd = sockfd;
+	ev.data.fd = sockfd;
 	ev.events =  EPOLLOUT|EPOLLIN;
 
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev);
@@ -50,12 +49,7 @@ int main(int argc, char *argv[]){
     ssize_t res;
     epollfd = epoll_create(1024);
     
-    for(int i = 0; i < 500; i++)
-    {
-    	printf("init %d\n", i);
-    	new_connet();	
-    	
-    }
+    for(int i = 0; i < 1000; i++) new_connet();
     
     
     printf("Staring a loop\n");
@@ -69,21 +63,28 @@ int main(int argc, char *argv[]){
 			{
 				//close the fd that went wrong
 				fprintf(stderr, "can write %d\n", i);
-				//int fd = events[i].data.fd;
+		        int fd = events[i].data.fd;
+		        sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
+		        write(sockfd, buffer, strlen(buffer));
+		        res = read(sockfd, buffer, BUFSIZ);
+                buffer[res] = 0;
+		        printf("%d write from server:\n\n", i);
+		        close(fd);
+				new_connet();
 				continue;
 			}
-		        else if(events[i].events & EPOLLIN)
-			     {
-		        	     fprintf(stderr, "can read %d\n", i);
-		                int fd = events[i].data.fd;
-		                sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
-		                write(fd, buffer, strlen(buffer));
-		                res = read(fd, buffer, BUFSIZ);
-		                buffer[res] = 0;
-		                printf("%d read from server:\n\n", i);
-		                close(fd);
-				        new_connet();
-		            }
+		    else if(events[i].events & EPOLLIN)
+			{
+		        fprintf(stderr, "can read %d\n", i);
+		        int fd = events[i].data.fd;
+		        sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
+		        write(sockfd, buffer, strlen(buffer));
+		        res = read(sockfd, buffer, BUFSIZ);
+                buffer[res] = 0;
+		        printf("%d read from server:\n\n", i);
+		        close(fd);
+				new_connet();
+		    }
 			else
 			{
 				close(events[i].data.fd);
