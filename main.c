@@ -61,6 +61,7 @@ void SigHandle(int sig){
     }
 }
 
+static char basedir[BUFSIZ]={0};
 char *tBuf[BUFSIZ];
 
 int main(int argc, char *args[])
@@ -72,8 +73,16 @@ int main(int argc, char *args[])
     
     signal(SIGPIPE, SigHandle);
     signal(SIGCHLD, SigHandle);
+    
+    // setting up the basedir
+    if(*basedir == 0){
+        strncpy(basedir, argv[0], BUFSIZ);
+        char *c = basedir + strlen(argv[0]);
+        for(; *c != '/'; --c);
+        *c = 0;
+    }
 
-	//enscapulation of bind() and listen() -- sockfd.h/c
+	// enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getlistenfd(&port);
     fprintf(tBuf, "Listen to port: %d\n", port);
     logging(tBuf, NORMAL);
@@ -237,12 +246,12 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
         ptr = strchr(uri, '?');
         if(ptr){
             logging(ptr, NORMAL)
-            sprintf(cgiargs, "/%s", ptr + 1);
+            sprintf(cgiargs, "%s%s", basedir, ptr + 1);
             *ptr = 0;
         }
         else *cgiargs = 0;
 
-        sprintf(filename, "./test/%s", uri);
+        sprintf(filename, "%s%s", basedir, uri);
         return 0;
     }
     else
