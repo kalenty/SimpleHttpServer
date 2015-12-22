@@ -1,3 +1,5 @@
+#ifndef CFG_H
+
 #define SERVER_STRING "SimpleHttpServer /1.0.0\r\n"
 
 #define GET 71
@@ -10,4 +12,6 @@
 static char basedir[BUFSIZ]="/home/ubuntu/SimpleHttpServer/test/";
 
 #define strhash(s) (*(s))
+
+#endif
 
