@@ -30,11 +30,14 @@ int logging(char *msg, log_type type)
 {
     char curTime[100] = {0,};
 
-    if (msg == NULL) return -1
+    if (msg == NULL) return -1;
+    
+    getTime(curTime, 2);
+    
     switch(type)
     {
     case NORMAL:
-       fprintf(logfd, "[%s] : %s\n", curTime, msg);
+       fprintf(stdout, "At %s : %s\n", curTime, msg);
 	   break;
     case ERROR:
        fprintf(logfd, "Error: [%s] : %s\n", curTime, msg);
