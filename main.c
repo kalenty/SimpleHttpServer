@@ -61,7 +61,7 @@ void SigHandle(int sig){
     }
 }
 
-static char basedir[BUFSIZ]={0};
+
 char *tBuf[BUFSIZ];
 
 int main(int argc, char *argv[])
@@ -240,12 +240,12 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     // 1 -- static
     // 0 -- dynamic
     char *ptr;
-
+    sprintf(tBuf, "Parsing uri:%s", uri);
+    logging(tBuf, NORMAL);
     if(strncmp(uri, "/cgi-bin", strlen("/cgi-bin")) == 0)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            logging(ptr, NORMAL);
             sprintf(cgiargs, "%s%s", basedir, ptr + 1);
             *ptr = 0;
         }
