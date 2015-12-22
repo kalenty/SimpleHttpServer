@@ -21,7 +21,7 @@ int setnonblock(int fd)
 	fcntl(fd, F_SETFL, flags);
 }
 
-struct epoll_event ev, events[MAXEVENTS];
+struct epoll_event ev, events[1024];
 int epollfd, nfds;
 
 void new_connet()
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 		                buffer[res] = 0;
 		                printf("%d read from server:\n\n", i);
 		                close(fd);
-						new_connet();
+				new_connet();
 		            }
 			else
 			{
