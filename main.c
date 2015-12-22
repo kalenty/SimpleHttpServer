@@ -64,7 +64,7 @@ void SigHandle(int sig){
 static char basedir[BUFSIZ]={0};
 char *tBuf[BUFSIZ];
 
-int main(int argc, char *args[])
+int main(int argc, char *argv[])
 {
 	struct sockaddr_in clientaddr;
 	socklen_t addrlen = sizeof(clientaddr);
@@ -84,7 +84,7 @@ int main(int argc, char *args[])
 
 	// enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getlistenfd(&port);
-    fprintf(tBuf, "Listen to port: %d\n", port);
+    sprintf(tBuf, "Listen to port: %d\n", port);
     logging(tBuf, NORMAL);
 
 	// set listen socket nonblocking
@@ -245,7 +245,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            logging(ptr, NORMAL)
+            logging(ptr, NORMAL);
             sprintf(cgiargs, "%s%s", basedir, ptr + 1);
             *ptr = 0;
         }
