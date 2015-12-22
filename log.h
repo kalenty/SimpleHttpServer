@@ -1,9 +1,11 @@
 #include "cfg.h"
 #include <time.h>
+#include <stdio.h>
+enum log_type{ ERROR, NORMAL}; 
 
-enum log_type{ ERROR, NORMAL} log_type;
 
+int logging(char *msg, enum log_type type);
 
-int logging(char *msg, log_type);
+int getTime(char *out, int fmt);
 
 int log_init();

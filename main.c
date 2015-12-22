@@ -23,7 +23,31 @@
 
 #include "rio.h"
 #include "cfg.h"
+#include "log.h"
 #include "sockfd.h"
+
+int parse_uri(char *uri, char *filename, char *cgiargs);
+
+void read_requesthdrs(rio_t *rp, char *cgiargs);
+
+void serve_dynamic(int fd, char *filename, char *cgiargs);
+
+void serve_static(int fd, char *filename, long size);
+
+void display_error(int fd, const char *cause, const char *errnum, const char *shortmsg, const char *longmsg);
+
+void get_filetype(char *filename, char *filetype);
+
+int handle_request(int fd);
+
+int setnonblocking(int sockfd)
+{
+    if (fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) == -1)
+    {
+	   return -1;
+    }
+    return 0;
+}
 
 void SigHandle(int sig){
     switch(sig){
@@ -43,6 +67,7 @@ int main(int argc, char *args[])
 	socklen_t addrlen = sizeof(clientaddr);
 	int listenfd, connfd;
 	uint16_t port = 54523;
+    char *ctime[BUFSIZ];
     
     signal(SIGPIPE, SigHandle);
     signal(SIGCHLD, SigHandle);
@@ -53,6 +78,8 @@ int main(int argc, char *args[])
 
 	// set listen socket nonblocking
 	setnonblocking(listenfd);
+    
+    //init the epoll event loop
 	struct epoll_event ev, events[MAXEVENTS];
 	int epollfd, nfds;
 	epollfd = epoll_create1(0);
@@ -97,7 +124,7 @@ int main(int argc, char *args[])
 			else
 			{
 				handle_request(events[i].data.fd);
-				//after handled client request, rm the fd from the events
+				//after handled client request, close the fd from the events
 				close(events[i].data.fd);
 			}
 
@@ -119,11 +146,14 @@ int handle_request(int fd)
 	rio_readinitb(&rio, fd);
 	rio_readlineb(&rio, buf, BUFSIZ);
 
+    logging(buf, NORMAL);
+    
 	sscanf(buf, "%s %s %s", method, uri, version);
 	if(uri[strlen(uri)-1] == '/')
 	        strncat(uri, "index.html", BUFSIZ);
 
 	read_requesthdrs(&rio, cgiargs);
+    logging(cgiargs, NORMAL);
 
 	switch(strhash(method)){
 	case GET:
@@ -204,7 +234,8 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            sprintf(cgiargs, ".%s", ptr+1);
+            //logging()
+            sprintf(cgiargs, ".%s", ptr + 1);
             *ptr = 0;
         }
         else *cgiargs = 0;
@@ -243,7 +274,7 @@ void get_filetype(char *filename, char *filetype)
 void read_requesthdrs(rio_t *rp, char *cgiargs)
 {
     char buf[BUFSIZ], *p;
-    int has_content=0, nread=0;
+    int has_content = 0, nread = 0;
     rio_readlineb(rp, buf, BUFSIZ);
     while(strcmp(buf, "\r\n")){
         if(strcasestr(buf, "content-length")){
