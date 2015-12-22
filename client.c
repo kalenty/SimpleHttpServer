@@ -76,11 +76,12 @@ int main(int argc, char *argv[]){
 		    else if(events[i].events & EPOLLIN)
 			{
 		        fprintf(stderr, "can read %d\n", i);
+		        printf("i %d read from server:\n\n", i);
 		        int fd = events[i].data.fd;
 		        sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
 		        write(sockfd, buffer, strlen(buffer));
 		        res = read(sockfd, buffer, BUFSIZ);
-                buffer[res] = 0;
+                	buffer[res] = 0;
 		        printf("%d read from server:\n\n", i);
 		        close(fd);
 				new_connet();
