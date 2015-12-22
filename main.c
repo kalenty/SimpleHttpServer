@@ -165,7 +165,7 @@ int handle_request(int fd)
 	        strncat(uri, "index.html", BUFSIZ);
 
 	read_requesthdrs(&rio, cgiargs);
-    logging("Read the drs:",cgiargs, NORMAL);
+    logging("Read the drs:", cgiargs, NORMAL);
 
 	switch(strhash(method)){
 	case GET:
@@ -241,7 +241,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     // 1 -- static
     // 0 -- dynamic
     char *ptr;
-    logging("Parsing uri:", tBuf, NORMAL);
+    logging("Parsing uri:", uri, NORMAL);
     if(strncmp(uri, "/cgi-bin", strlen("/cgi-bin")) == 0)
     {
         ptr = strchr(uri, '?');
