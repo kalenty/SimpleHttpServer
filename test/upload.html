@@ -1,0 +1,28 @@
+<HTML>
+    <HEAD>
+        <TITLE>Upload</TITLE>
+        <META HTTP-EQUIV="CONTENT-TYPE" CONTENT="TEXT/HTML;CHARSER=UTF-8">
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+<script type="text/javascript">
+    function upload_file(){
+            if( document.getElementById('FILE1').value == '' ){
+                alert("Please choose a file！");
+                return false;
+            }
+            
+            document.getElementById('uploadInfo').innerHTML = '' ;
+            document.getElementById('uploadInfo').innerHTML = '<img src="images/wait.gif"><br>Uploading……' ;
+            
+            document.getElementById('form1').submit();
+    }
+</script>        
+    </HEAD>
+    <BODY BGCOLOR="#FFFFFF">
+        <FORM METHOD="POST" id="form1" name="form1" ENCTYPE="multipart/form-data" ACTION="cgi-bin/uploadcgi.cgi">
+            Choose file：<INPUT TYPE="FILE" NAME="FILE1" id="FILE1" class="btn"><INPUT TYPE="button" onclick="upload_file()" VALUE="upload" class="btn"><br>
+            <center>
+                <div id="uploadInfo"></div>
+            </center>
+        </FORM>
+    </BODY>
+</HTML>
