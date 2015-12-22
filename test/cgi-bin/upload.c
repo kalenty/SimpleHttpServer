@@ -145,7 +145,6 @@ int main(void)
                                 getState = STATE_END;
                                 nowReadLen = 1;
                                 ShowErrorInfo("Success");
-                                */
                             }
                             else
                             {
