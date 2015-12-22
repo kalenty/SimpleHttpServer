@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
     ssize_t res;
     epollfd = epoll_create(1024);
     
-    for(int i = 0; i < 1024; i++) new_connet();
+    new_connet();
     
     
     printf("Staring a loop\n");
