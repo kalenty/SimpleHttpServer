@@ -63,6 +63,7 @@ void SigHandle(int sig){
 
 
 char *tBuf[BUFSIZ];
+static char basedir[BUFSIZ]="/home/ubuntu/SimpleHttpServer/test/";
 
 int main(int argc, char *argv[])
 {

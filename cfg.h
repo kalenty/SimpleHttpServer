@@ -9,8 +9,6 @@
 #define MAXEVENTS 1024
 #define MAXARGS 20
 
-static char basedir[BUFSIZ]="/home/ubuntu/SimpleHttpServer/test/";
-
 #define strhash(s) (*(s))
 
 #endif
