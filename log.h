@@ -1,6 +1,9 @@
 #include "config.h"
+#include <time.h>
 
-enum log_type{ ERROR, NORMAL, EXCEPTION} log_type;
+enum log_type{ ERROR, NORMAL} log_type;
 
 
-void logging(char *msg, log_type);
+int logging(char *msg, log_type);
+
+int log_init();
