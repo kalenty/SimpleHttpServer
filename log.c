@@ -26,7 +26,7 @@ int getTime(char *out, int fmt)
 	return 0;
 }
 
-int logging(char *msg, enum log_type type)
+int logging(char *cause, char *msg, enum log_type type)
 {
     char curTime[100] = {0,};
 
@@ -37,10 +37,10 @@ int logging(char *msg, enum log_type type)
     switch(type)
     {
     case NORMAL:
-       fprintf(stdout, "At %s : %s\n", curTime, msg);
+       fprintf(stdout, "At %s : %s -- %s\n", curTime, cause, msg);
 	   break;
     case ERROR:
-       fprintf(stdout, "Error: [%s] : %s\n", curTime, msg);
+       fprintf(stdout, "Error: [%s] : %s\n", curTime, cause, msg);
 	   break;
     default:
 	   break;

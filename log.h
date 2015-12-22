@@ -4,7 +4,7 @@
 enum log_type{ ERROR, NORMAL}; 
 
 
-int logging(char *msg, enum log_type type);
+int logging(char *cause, char *msg, enum log_type type);
 
 int getTime(char *out, int fmt);
 

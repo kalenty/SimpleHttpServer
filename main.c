@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 	// enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getlistenfd(&port);
     sprintf(tBuf, "Listen to port: %d\n", port);
-    logging(tBuf, NORMAL);
+    logging("SimpleHttpServer:", tBuf, NORMAL);
 
 	// set listen socket nonblocking
 	setnonblocking(listenfd);
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	ev.events = EPOLLIN;
 
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev);
-
+    logging("Staring a loop", " ", NORMAL);
 	for(;;)
 	{
 		// argumet -1 indicated the timeout is no sure (blocking) -- we will change it depends on requirement
@@ -158,14 +158,14 @@ int handle_request(int fd)
 	rio_readinitb(&rio, fd);
 	rio_readlineb(&rio, buf, BUFSIZ);
 
-    logging(buf, NORMAL);
+    logging("Hanle request:", buf, NORMAL);
     
 	sscanf(buf, "%s %s %s", method, uri, version);
 	if(uri[strlen(uri)-1] == '/')
 	        strncat(uri, "index.html", BUFSIZ);
 
 	read_requesthdrs(&rio, cgiargs);
-    logging(cgiargs, NORMAL);
+    logging("Read the drs:",cgiargs, NORMAL);
 
 	switch(strhash(method)){
 	case GET:
@@ -194,7 +194,7 @@ int handle_request(int fd)
 	     }
 	     break;
 	case POST: 
-	     sprintf(filename, ".%s", uri);
+	     sprintf(filename, "%s%s", basedir, uri);
 		if(stat(filename, &sbuf) < 0)
 		{
 			display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -241,24 +241,23 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     // 1 -- static
     // 0 -- dynamic
     char *ptr;
-    sprintf(tBuf, "Parsing uri:%s", uri);
-    logging(tBuf, NORMAL);
+    logging("Parsing uri:", tBuf, NORMAL);
     if(strncmp(uri, "/cgi-bin", strlen("/cgi-bin")) == 0)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            sprintf(cgiargs, "%s%s", basedir, ptr + 1);
+            sprintf(cgiargs, "%s", ptr + 1);
             *ptr = 0;
         }
         else *cgiargs = 0;
-
+        logging("Dynamic uri:", uri, NORMAL);
         sprintf(filename, "%s%s", basedir, uri);
         return 0;
     }
     else
     {
         *cgiargs = 0;
-	logging(uri, NORMAL);
+        logging("Static uri:", uri, NORMAL);
         sprintf(filename, "%s", uri);
         return 1;
     }
