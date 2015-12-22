@@ -169,6 +169,7 @@ int handle_request(int fd)
 
 	switch(strhash(method)){
 	case GET:
+        logging("GET :", uri, NORMAL);
 	    is_static = parse_uri(uri, filename, cgiargs);
 	    if(stat(filename, &sbuf) < 0)
 	    {
@@ -194,7 +195,8 @@ int handle_request(int fd)
 	     }
 	     break;
 	case POST: 
-	     sprintf(filename, ".%s", uri);
+        logging("POST :", uri, NORMAL);
+	    sprintf(filename, ".%s", uri);
 		if(stat(filename, &sbuf) < 0)
 		{
 			display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -208,6 +210,7 @@ int handle_request(int fd)
 		serve_dynamic(fd, filename, cgiargs);
 		break;
 	case HEAD:
+        logging("HEAD :", uri, NORMAL);
 		display_error(fd, "HEAD request", "200", "OK", "Succeed");
 		break;
 	default:
