@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     buf = getenv("QUERY_STR");
     getvalue(buf, name);
 
-    sprintf(content, "<p>Nice to meet you %s!</p>\r\n", name);
+    sprintf(content, "<p>Welcome to my castle!</p>\r\n<p>Nice to meet you %s!</p>\r\n", name);
 
     printf("Content-length: %d\r\n", (int)strlen(content));
     printf("Content-type: text/html\r\n\r\n");
