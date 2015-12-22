@@ -21,16 +21,17 @@ int setnonblocking(int fd)
 	fcntl(fd, F_SETFL, flags);
 }
 
-struct epoll_event ev, events[1024];
+struct epoll_event events[1024];
 int epollfd, nfds;
 
 void new_connet()
 {
-    int sockfd;
-    sockfd = getclientfd("127.0.0.1", (uint16_t) 54523);
-    setnonblocking(sockfd);
+    	int sockfd;
+    	sockfd = getclientfd("127.0.0.1", (uint16_t) 54523);
+    	setnonblocking(sockfd);
     
-	ev.data.fd = sockfd;
+    	struct epoll_event ev;
+    	ev.data.fd = sockfd;
 	ev.events =  EPOLLOUT|EPOLLIN;
 
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev);
