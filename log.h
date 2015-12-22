@@ -1,4 +1,4 @@
-#include "config.h"
+#include "cfg.h"
 #include <time.h>
 
 enum log_type{ ERROR, NORMAL} log_type;
