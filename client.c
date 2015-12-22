@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include "sockfd.h"
 
-int setnonblock(int fd)
+int setnonblocking(int fd)
 {
 	int flags;
 	flags = fcntl(fd, F_GETFL);
@@ -27,7 +27,7 @@ int epollfd, nfds;
 void new_connet()
 {
     int sockfd;
-    sockfd = open_clientfd("127.0.0.1", (uint16_t) 54523);
+    sockfd = getclientfd("127.0.0.1", (uint16_t) 54523);
     setnonblocking(sockfd);
     
 	ev.data.fd = sockfd;
