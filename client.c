@@ -71,8 +71,8 @@ int main(int argc, char *argv[]){
 		        	     fprintf(stderr, "can read %d\n", i);
 		                int fd = events[i].data.fd;
 		                sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
-		                write(sockfd, buffer, strlen(buffer));
-		                res = read(sockfd, buffer, BUFSIZ);
+		                write(fd, buffer, strlen(buffer));
+		                res = read(fd, buffer, BUFSIZ);
 		                buffer[res] = 0;
 		                printf("%d read from server:\n\n", i);
 		                close(fd);
