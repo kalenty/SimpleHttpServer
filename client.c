@@ -56,10 +56,10 @@ int main(int argc, char *argv[]){
 	for(;;)
 	{
 		// argumet -1 indicated the timeout is no sure (blocking) -- we will change it depends on requirement
-		nfds = epoll_wait(epollfd, events, MAXEVENTS, -1);
+		nfds = epoll_wait(epollfd, events, 1024, -1);
 		for(int i = 0; i < nfds; i++)
 		{
-			if((events[i].events & EPOLLOUT)
+			if(events[i].events & EPOLLOUT)
 			{
 				//close the fd that went wrong
 				fprintf(stderr, "can write %d\n", i);
@@ -67,8 +67,8 @@ int main(int argc, char *argv[]){
 				continue;
 			}
 		        else if(events[i].events & EPOLLIN)
-			{
-		        	fprintf(stderr, "can read %d\n", i);
+			     {
+		        	     fprintf(stderr, "can read %d\n", i);
 		                int fd = events[i].data.fd;
 		                sprintf(buffer, "GET / HTTP/1.0\r\n\r\n");
 		                write(sockfd, buffer, strlen(buffer));
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 		                buffer[res] = 0;
 		                printf("%d read from server:\n\n", i);
 		                close(fd);
-				new_connet();
+				        new_connet();
 		            }
 			else
 			{
