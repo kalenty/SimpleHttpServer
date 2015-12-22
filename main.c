@@ -196,7 +196,7 @@ int handle_request(int fd)
 	     break;
 	case POST: 
         logging("POST :", uri, NORMAL);
-	    sprintf(filename, ".%s", uri);
+	    sprintf(filename, "%s%s", basedir, uri);
 		if(stat(filename, &sbuf) < 0)
 		{
 			display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -261,7 +261,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         *cgiargs = 0;
         logging("Static uri:", uri, NORMAL);
-        sprintf(filename, "%s", uri);
+        sprintf(filename, "%s%s", basedir, uri);
         return 1;
     }
 }
