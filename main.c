@@ -257,8 +257,8 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     else
     {
         *cgiargs = 0;
-        logging(uri, NORMAL)
-        sprintf(filename, "./test/%s", uri);
+	logging(uri, NORMAL);
+        sprintf(filename, "%s", uri);
         return 1;
     }
 }
