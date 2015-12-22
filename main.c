@@ -234,19 +234,19 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            //logging()
-            sprintf(cgiargs, ".%s", ptr + 1);
+            logging(uri, NORMAL);
+            sprintf(cgiargs, "./test/%s", ptr + 1);
             *ptr = 0;
         }
         else *cgiargs = 0;
 
-        sprintf(filename, ".%s", uri);
+        sprintf(filename, "./test/%s", uri);
         return 0;
     }
     else
     {
         *cgiargs = 0;
-
+	logging(uri, NORMAL);
         sprintf(filename, "%s", uri);
         return 1;
     }
