@@ -63,7 +63,7 @@ void SigHandle(int sig){
 
 
 char *tBuf[BUFSIZ];
-static char basedir[BUFSIZ]="/home/ubuntu/SimpleHttpServer/test/";
+static char basedir[BUFSIZ]="/home/ubuntu/SimpleHttpServer/test";
 
 int main(int argc, char *argv[])
 {
@@ -194,7 +194,7 @@ int handle_request(int fd)
 	     }
 	     break;
 	case POST: 
-	     sprintf(filename, "%s%s", basedir, uri);
+	     sprintf(filename, ".%s", uri);
 		if(stat(filename, &sbuf) < 0)
 		{
 			display_error(fd, filename, "404", "Not found", "Can not find this file");
@@ -242,7 +242,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     // 0 -- dynamic
     char *ptr;
     logging("Parsing uri:", uri, NORMAL);
-    if(strncmp(uri, "/cgi-bin", strlen("/cgi-bin")) == 0)
+    if(strcasestr(uri, "/cgi-bin"))
     {
         ptr = strchr(uri, '?');
         if(ptr){
