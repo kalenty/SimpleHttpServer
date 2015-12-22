@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
     getvalue(p+1, arg2);
     n1=atoi(arg1); n2=atoi(arg2);
 
-    sprintf(content, "<p>Welcome! </p>\r\n");
+    sprintf(content, "<h3>CGI GET</h3>\r\n<form action=\"cgi-bin/adder\" method=\"GET\">\r\n<p>First Number:<br/>\r\n<input type=\"text\" name=\"num1\" /></p>\r\n<p>Second Number:<br/>\r\n<input type=\"text\" name=\"num2\" /></p>\r\n<input type=\"submit\" value=\"Submit\" />\r\n</form>");
     sprintf(content, "%s<p>The answer is %d + %d = %d</p>\r\n", content, n1, n2, n1+n2);
 
     printf("Content-length: %d\r\n", (int)strlen(content));
