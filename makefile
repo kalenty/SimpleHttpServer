@@ -3,7 +3,7 @@ CFLAGS := ""
 
 all:simpleHttpServer
 
-simpleHttpServer: main.c rio.c sockfd.c log.c
+simpleHttpServer: main.c rio.c sockfd.c
 	clang $^ -g -o $@
 
 client:client.c sockfd.c
