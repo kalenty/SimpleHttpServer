@@ -61,20 +61,22 @@ void SigHandle(int sig){
     }
 }
 
+char *tBuf[BUFSIZ];
+
 int main(int argc, char *args[])
 {
 	struct sockaddr_in clientaddr;
 	socklen_t addrlen = sizeof(clientaddr);
 	int listenfd, connfd;
 	uint16_t port = 54523;
-    char *ctime[BUFSIZ];
     
     signal(SIGPIPE, SigHandle);
     signal(SIGCHLD, SigHandle);
 
 	//enscapulation of bind() and listen() -- sockfd.h/c
 	listenfd = getlistenfd(&port);
-    printf("Listen to port: %d\n", port);
+    fprintf(tBuf, "Listen to port: %d\n", port);
+    logging(tBuf, NORMAL);
 
 	// set listen socket nonblocking
 	setnonblocking(listenfd);
@@ -234,20 +236,20 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     {
         ptr = strchr(uri, '?');
         if(ptr){
-            //logging()
-            sprintf(cgiargs, ".%s", ptr + 1);
+            logging(ptr, NORMAL)
+            sprintf(cgiargs, "/%s", ptr + 1);
             *ptr = 0;
         }
         else *cgiargs = 0;
 
-        sprintf(filename, ".%s", uri);
+        sprintf(filename, "./test/%s", uri);
         return 0;
     }
     else
     {
         *cgiargs = 0;
-
-        sprintf(filename, "%s", uri);
+        logging(uri, NORMAL)
+        sprintf(filename, "./test/%s", uri);
         return 1;
     }
 }
